@@ -1,0 +1,11 @@
+*.orig
+node_modules
+npm-debug.log
+dist
+dev-server
+**/build
+**/.idea
+**/.gradle
+**/*.iml
+**/*.log
+tsout
