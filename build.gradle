@@ -1,7 +1,9 @@
 group 'com.esp'
 version '1.0-SNAPSHOT'
 
+apply plugin: 'idea'
 apply plugin: 'java'
+apply plugin: 'maven-publish'
 
 repositories {
     mavenCentral()
@@ -14,5 +16,13 @@ dependencies {
 test {
     afterTest { desc, result ->
         println "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
     }
 }

@@ -11,10 +11,13 @@ import com.esp.reactive.EventObservable;
 import java.lang.invoke.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class ReflectiveEventObservationWireup<TModel> extends DisposableBase {
     private Object _observer;
     private Router<TModel> _router;
+    private static HashSet<Object> ObservedObjects = new HashSet<>();
 
     public ReflectiveEventObservationWireup(Object observer, Router<TModel> router) {
         _observer = observer;
@@ -23,6 +26,12 @@ public class ReflectiveEventObservationWireup<TModel> extends DisposableBase {
 
     public void observeEvents() {
         try {
+            if(ObservedObjects.contains(_observer)) {
+                throw new RuntimeException("observeEvents() has already been called on object");
+            } else {
+                ObservedObjects.add(_observer);
+                addDisposable(() -> ObservedObjects.remove(_observer));
+            }
             for (Method method : _observer.getClass().getMethods()) {
                 ObserveEvent[] observeEvents = method.getAnnotationsByType(ObserveEvent.class);
                 if (observeEvents.length == 1) {

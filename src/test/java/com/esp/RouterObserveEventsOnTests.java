@@ -1,8 +1,10 @@
 package com.esp;
 
 
+import com.esp.disposables.Disposable;
 import com.esp.routerTestStubs.*;
 import org.junit.*;
+import org.junit.rules.ExpectedException;
 
 import java.util.ArrayList;
 
@@ -46,6 +48,36 @@ public class RouterObserveEventsOnTests {
     @Ignore 
     public void CanObserveMultipleEventsByBaseEventTypeAtCorrectStage() throws Exception {
         new CanObserveMultipleEventsByBaseEventTypeAtCorrectStage().run();
+    }
+
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
+
+    @Test
+    public void ThrowsIfObserveEventOnCalledTwiceWithSameObserver() {
+        DefaultRouter<SimpleModel> router = new DefaultRouter<>(new StubRouterDispatcher(), new StubTerminalErrorHandler());
+        SimpleModel m = new SimpleModel();
+        router.setModel(m);
+        router.observeEventsOn(m);
+        exception.expect(RuntimeException.class);
+        router.observeEventsOn(m);
+    }
+
+    @Test
+    public void CanReObserveAfterDisposingPreviousSubscription() {
+        DefaultRouter<SimpleModel> router = new DefaultRouter<>(new StubRouterDispatcher(), new StubTerminalErrorHandler());
+        SimpleModel m = new SimpleModel();
+        router.setModel(m);
+        Disposable d = router.observeEventsOn(m);
+        d.dispose();
+        router.observeEventsOn(m);
+    }
+
+    public class SimpleModel  {
+        @ObserveEvent(eventClass = FooEvent.class)
+        public void observeFooEvent() {
+
+        }
     }
 
     public class CanObserveUsingWithNoParams extends ObserveEventsOnBase {
